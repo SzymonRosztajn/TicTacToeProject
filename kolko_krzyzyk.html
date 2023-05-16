@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href=style.css>
+    <title>Kolko i Krzyzyk</title>
+</head>
+<body>
+<h1>Kolko i Krzyzyk</h1>
+<table style="margin: auto;" id="board">
+</table>
+<br>
+<div style="text-align: center;">
+    <button id="resetBtn">Nowa gra</button>
+    <button onclick="undoMove()">Cofnij</button>
+</div>
+<script>
+
+    let boardSize = 3; //default board size
+    let board = []; // 2D array to represent the game board
+    let currentPlayer = "X"; // X always starts first
+    let gameOver = false; //flag for game over
+    let winner = ""; //winner of the game
+    let moves = 0; //counter for total moves made
+    let lastMove;
+
+
+    // Function to generate the game board
+    function generateBoard() {
+        let boardHTML = "";
+        for (let i = 0; i < boardSize; i++) {
+            boardHTML += "<tr>";
+            board.push([]);
+            for (let j = 0; j < boardSize; j++) {
+                board[i].push("");
+                boardHTML += "<td onclick='makeMove(" + i + "," + j + ")'></td>";
+            }
+            boardHTML += "</tr>";
+        }
+        document.getElementById("board").innerHTML = boardHTML;
+
+    }
+
+    // Function to check if a player has won
+    function checkWin(row, col) {
+        let i;
+        const symbol = board[row][col];
+        let diagonal1 = true;
+        let diagonal2 = true;
+        let horizontal = true;
+        let vertical = true;
+
+        // Check diagonal win (top-left to bottom-right)
+        for (i = 0; i < boardSize; i++) {
+            diagonal1 &= board[i][i] === symbol;
+        }
+
+        // Check diagonal win (top-right to bottom-left)
+        for (i = 0; i < boardSize; i++) {
+            diagonal2 &= board[i][boardSize - i - 1] === symbol;
+        }
+
+        // Check horizontal win
+        for (i = 0; i < boardSize; i++) {
+            horizontal &= board[row][i] === symbol;
+        }
+
+        // Check vertical win
+        for (i = 0; i < boardSize; i++) {
+            vertical &= board[i][col] === symbol;
+        }
+
+        if (diagonal1 || diagonal2 || horizontal || vertical) {
+            gameOver = true;
+            winner = symbol;
+            alert(winner + " Wygrywa!");
+        }
+    }
+
+    function checkTie() {
+        if (!gameOver) {
+            for (let i = 0; i < boardSize; i++) {
+                for (let j = 0; j < boardSize; j++) {
+                    if (board[i][j] === "") return false;
+                }
+            }
+            gameOver = true;
+            alert("Remis!");
+            return true;
+        }
+    }
+
+    function resetGame() {
+        board = [];
+        currentPlayer = "X";
+        gameOver = false;
+        winner = "";
+        moves = 0;
+        generateBoard();
+    }
+
+    function makeMove(row, col) {
+        if (!gameOver && board[row][col] === "") {
+            lastMove = [row, col]; // save last move
+            board[row][col] = currentPlayer;
+            document.getElementsByTagName("td")[row * boardSize + col].innerHTML = currentPlayer;
+            checkWin(row, col);
+            checkTie();
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+        }
+    }
+
+    function undoMove() {
+        if (lastMove) {
+            let row = lastMove[0];
+            let col = lastMove[1];
+            board[row][col] = "";
+            document.getElementsByTagName("td")[row * boardSize + col].innerHTML = "";
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+            gameOver = false;
+            lastMove = null;
+        }
+    }
+
+    // Event listener for the reset button
+    document.getElementById("resetBtn").addEventListener("click", resetGame);
+
+    // Initialize the game board
+    generateBoard();
+</script>
+</body>
+</html>
